@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head><title>raspi</title>
+</head>
+<body>
+<div>miniscope 0.0.1</div>
+<div style='width:96%; height:90vh; border-style:none;'><canvas id='myChart'></canvas></div>
+<script src='https://cdn.jsdelivr.net/npm/chart.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/luxon'></script>
+<script src='https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon'></script>
+
+<script>
+const ctx = document.getElementById( 'myChart' ).getContext( '2d' );
+const chart = new Chart( ctx,
+{
+    type: 'line',
+	data: {
+		labels: [],
+		datasets: [
+            { label: 'channel1', data: [], yAxisID: 'y', },
+            { label: 'channel2', data: [], yAxisID: 'y', },
+            { label: 'channel3', data: [], yAxisID: 'y', },
+            { label: 'channel4', data: [], yAxisID: 'y', },
+        ],
+    },
+	options:
+	{
+		stacked: false,
+		animation: false,
+ 		maintainAspectRatio: false,
+		scales: {
+			x: { display: true },
+			y: { display: true, position: 'left' },
+            y2: { display: true, position: 'right' },
+		},
+	},
+});
+
+function updateChart( samples )
+{
+    //console.log( samples.length );
+    //channels are in array of arrays
+    for( let i = 0; i < samples.length; i++ )
+    {
+        chart.data.labels = samples[i].map( ( _, i ) => i );
+        chart.data.datasets[i].data = samples[i];
+        chart.update( 'none' );
+    }
+}
+
+setInterval( async () => {
+    const response = await fetch( '/data' );
+    const samples = await response.json();
+    //console.log( samples );       //seems to work
+    updateChart( samples );
+}, 500 );
+
+</script>
+</body>
+</html>
