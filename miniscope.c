@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Daniel Wegkamp
+ * Licensed under the  GNU GPLv3 License
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,9 +15,11 @@
 #include <linux/types.h>
 #include <linux/spi/spidev.h>
 
+//http server settings
 #define PORT        8080
-#define MAX_SAMPLES 512
+#define MAX_SAMPLES 512    //absolute max?
 
+//SPI interface to STM32F303RE microcontroller:
 const char *devicePath = "/dev/spidev1.0";
 uint8_t mode = SPI_MODE_0;
 uint8_t bitsPerWord = 8;
@@ -22,6 +29,7 @@ struct spi_ioc_transfer spiTransfer;
 uint8_t tx[2];
 uint8_t rx[2];
 
+//data storage
 float gFactor;       // init in main:  = 3.3/4096
 float gData[4][MAX_SAMPLES];
 
@@ -77,7 +85,7 @@ int SPI_fetch_data( int channel )
     int repeats = SPI_simple_transfer( 0x5000 );             //fetch size
 
     if( repeats > MAX_SAMPLES )
-    { repeats = MAX_SAMPLES; }
+    { repeats = MAX_SAMPLES; }      //only ever fetch that amount (worst case the MCU tries to send more, but is abortet...)
 
     for( int i = 0; i < repeats; i++ )
     {
